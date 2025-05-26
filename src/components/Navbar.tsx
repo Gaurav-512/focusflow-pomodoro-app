@@ -23,7 +23,7 @@ export function Navbar() {
     return (
       <header className="bg-card border-b border-border sticky top-0 z-50">
         <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-primary">
+          <Link href="/" className="text-2xl font-[--font-poppins] font-bold text-primary">
             FocusFlow
           </Link>
           <div className="flex items-center space-x-2">
@@ -37,7 +37,7 @@ export function Navbar() {
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50 shadow-sm">
       <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-primary hover:opacity-80 transition-opacity">
+        <Link href="/" className="text-2xl font-[--font-poppins] font-bold text-primary hover:opacity-80 transition-opacity">
           FocusFlow
         </Link>
         <div className="flex items-center space-x-2 sm:space-x-4">

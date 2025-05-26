@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist, Geist_Mono, Poppins } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { SettingsProvider } from '@/providers/SettingsProvider';
@@ -18,6 +18,12 @@ const geistMono = Geist_Mono({
   subsets: ['latin'],
 });
 
+const poppins = Poppins({
+  variable: '--font-poppins',
+  subsets: ['latin'],
+  weight: ['600', '700'], // Using 600 for semi-bold and 700 for bold
+});
+
 export const metadata: Metadata = {
   title: 'FocusFlow – Pomodoro Timer',
   description: 'Increase productivity with the Pomodoro technique.',
@@ -30,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased font-sans`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SettingsProvider>
             <StatsProvider>

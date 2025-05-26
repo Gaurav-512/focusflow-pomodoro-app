@@ -58,6 +58,38 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [settings, currentSession, isRunning, getDuration]);
 
+  const playSoundEffect = useCallback(() => {
+    if (typeof window !== 'undefined' && !settings.isMuted) {
+      try {
+        // Check for AudioContext and vendor prefixes
+        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
+        if (!AudioContext) {
+          console.warn("Web Audio API is not supported in this browser.");
+          return; 
+        }
+        const audioContext = new AudioContext();
+        
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.type = 'sine'; // A simple, clean tone
+        oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
+        
+        // Start with a low volume and quickly ramp up then down to avoid harsh clicks
+        gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01); // Quick ramp up (Volume: 0.1)
+        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5); // Fade out over 0.5s
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.5); // Play for 0.5 seconds
+      } catch (error) {
+        console.error("Failed to play sound effect:", error);
+      }
+    }
+  }, [settings.isMuted]);
 
   const advanceSession = useCallback(() => {
     let nextSession: SessionType;
@@ -81,10 +113,12 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     
     setCurrentSession(nextSession);
     setPomodoroCycle(newPomodoroCycle);
-    setTimeLeft(getDuration(nextSession)); // Set timeLeft for the new session
+    setTimeLeft(getDuration(nextSession)); 
+    
+    playSoundEffect();
     sendNotification(`${nextSession} Started!`, { body: `Time for your ${nextSession.toLowerCase()} session.` });
 
-  }, [currentSession, pomodoroCycle, addCompletedSession, getDuration, sendNotification, settings.autoStartBreaks, settings.autoStartFocus, settings.longBreakInterval]);
+  }, [currentSession, pomodoroCycle, addCompletedSession, getDuration, sendNotification, settings.autoStartBreaks, settings.autoStartFocus, settings.longBreakInterval, playSoundEffect]);
 
 
   useEffect(() => {
@@ -116,9 +150,8 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const skipSession = () => {
-    setIsRunning(false); // Stop current timer before skipping
-    advanceSession(); // Advance to next session logic
-     // If autoStart is on for the next session type, it will be handled by advanceSession
+    setIsRunning(false); 
+    advanceSession(); 
   };
 
   const formatTime = (seconds: number): string => {
