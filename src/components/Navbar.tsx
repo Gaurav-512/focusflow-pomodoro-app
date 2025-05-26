@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Settings, Sun, Moon } from 'lucide-react';
+import { Home, Settings, Sun, Moon, CalendarDays } from 'lucide-react'; // Added CalendarDays
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -40,11 +40,17 @@ export function Navbar() {
         <Link href="/" className="text-2xl font-[--font-poppins] font-bold text-primary hover:opacity-80 transition-opacity">
           FocusFlow
         </Link>
-        <div className="flex items-center space-x-2 sm:space-x-4">
+        <div className="flex items-center space-x-1 sm:space-x-2">
           <Link href="/" passHref>
             <Button variant={isActive('/') ? 'default' : 'ghost'} size="sm" aria-label="Timer Page">
               <Home className="h-5 w-5 sm:mr-2" />
               <span className="hidden sm:inline">Timer</span>
+            </Button>
+          </Link>
+          <Link href="/timetable" passHref>
+            <Button variant={isActive('/timetable') ? 'default' : 'ghost'} size="sm" aria-label="Timetable Page">
+              <CalendarDays className="h-5 w-5 sm:mr-2" />
+              <span className="hidden sm:inline">Timetable</span>
             </Button>
           </Link>
           <Link href="/settings" passHref>
