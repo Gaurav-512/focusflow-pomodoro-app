@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { createContext, useContext, ReactNode, useCallback }_from 'react';
+import React, { createContext, useContext, ReactNode, useCallback, useEffect } from 'react';
 import useLocalStorage from '@/hooks/useLocalStorage';
 import { LOCAL_STORAGE_KEYS, Stats, DailyStats } from '@/lib/constants';
 import { format, differenceInCalendarDays, subDays, isToday } from 'date-fns';
@@ -110,3 +110,4 @@ export const useStats = (): StatsContextType => {
   }
   return context;
 };
+
