@@ -6,6 +6,7 @@ import { useSettings } from './SettingsProvider';
 import { useStats } from './StatsProvider';
 import { useNotifications } from '@/hooks/useNotifications';
 import { SessionType, SESSIONS_BEFORE_LONG_BREAK } from '@/lib/constants';
+import { playSoundEffect } from '@/lib/soundUtils'; // Import the utility
 
 interface TimerContextType {
   currentSession: SessionType;
@@ -58,37 +59,8 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [settings, currentSession, isRunning, getDuration]);
 
-  const playSoundEffect = useCallback(() => {
-    if (typeof window !== 'undefined' && !settings.isMuted) {
-      try {
-        // Check for AudioContext and vendor prefixes
-        const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-        if (!AudioContext) {
-          console.warn("Web Audio API is not supported in this browser.");
-          return; 
-        }
-        const audioContext = new AudioContext();
-        
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.type = 'sine'; // A simple, clean tone
-        oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4 note
-        
-        // Start with a low volume and quickly ramp up then down to avoid harsh clicks
-        gainNode.gain.setValueAtTime(0.0001, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01); // Quick ramp up (Volume: 0.1)
-        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + 0.5); // Fade out over 0.5s
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + 0.5); // Play for 0.5 seconds
-      } catch (error) {
-        console.error("Failed to play sound effect:", error);
-      }
-    }
+  const handleSessionEndSound = useCallback(() => {
+    playSoundEffect(settings.isMuted);
   }, [settings.isMuted]);
 
   const advanceSession = useCallback(() => {
@@ -115,10 +87,10 @@ export const TimerProvider = ({ children }: { children: ReactNode }) => {
     setPomodoroCycle(newPomodoroCycle);
     setTimeLeft(getDuration(nextSession)); 
     
-    playSoundEffect();
+    handleSessionEndSound();
     sendNotification(`${nextSession} Started!`, { body: `Time for your ${nextSession.toLowerCase()} session.` });
 
-  }, [currentSession, pomodoroCycle, addCompletedSession, getDuration, sendNotification, settings.autoStartBreaks, settings.autoStartFocus, settings.longBreakInterval, playSoundEffect]);
+  }, [currentSession, pomodoroCycle, addCompletedSession, getDuration, sendNotification, settings.autoStartBreaks, settings.autoStartFocus, settings.longBreakInterval, handleSessionEndSound]);
 
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono, Poppins } from 'next/font/google';
 import './globals.css';
@@ -7,6 +8,7 @@ import { StatsProvider } from '@/providers/StatsProvider';
 import { TimerProvider } from '@/providers/TimerProvider';
 import { Navbar } from '@/components/Navbar';
 import { Toaster } from '@/components/ui/toaster';
+import { TimetableNotificationHandler } from '@/components/TimetableNotificationHandler'; // Added import
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -41,6 +43,7 @@ export default function RootLayout({
           <SettingsProvider>
             <StatsProvider>
               <TimerProvider>
+                <TimetableNotificationHandler /> {/* Added component here */}
                 <div className="flex flex-col min-h-screen">
                   <Navbar />
                   <main className="flex-grow container mx-auto px-4 py-8">
