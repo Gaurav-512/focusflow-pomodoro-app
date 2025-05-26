@@ -8,58 +8,66 @@ body {
 
 @layer base {
   :root {
-    --background: 210 100% 98%; /* Very pale blue */
-    --foreground: 220 30% 20%; /* Dark slate blue */
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 220 30% 20%;
+    --background: 220 60% 97%; /* Very Pale Blue - Calming, spacious */
+    --foreground: 220 25% 30%; /* Dark Slate Blue - Good contrast for text */
+    --card: 0 0% 100%; /* White - Clean for cards */
+    --card-foreground: 220 25% 30%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 30% 20%;
-    --primary: 210 88% 68%; /* Calm Blue: #64B5F6 */
+    --popover-foreground: 220 25% 30%;
+    --primary: 210 70% 56%; /* Trustworthy Blue - For Focus state & main actions */
     --primary-foreground: 0 0% 100%; /* White */
-    --secondary: 210 40% 94%; /* Slightly darker pale blue */
-    --secondary-foreground: 220 30% 20%;
+    --secondary: 200 65% 90%; /* Light Sky Blue - Secondary elements */
+    --secondary-foreground: 210 30% 40%;
     --muted: 210 40% 94%;
-    --muted-foreground: 210 30% 45%; /* Muted text color */
-    --accent: 46 100% 65%; /* Vibrant Yellow: #FFD54F */
-    --accent-foreground: 45 90% 20%; /* Dark color for text on accent */
-    --destructive: 0 84.2% 60.2%;
+    --muted-foreground: 210 35% 55%;
+    --accent: 150 60% 50%; /* Soft Teal/Green - For Short Breaks, positive feedback */
+    --accent-foreground: 150 20% 98%; /* Very light for text on accent */
+    --long-break: 260 60% 70%; /* Soft Lavender - For Long Breaks, calming */
+    --long-break-foreground: 260 20% 98%;
+    --warning: 45 95% 60%; /* Bright Yellow - For notifications/warnings */
+    --warning-foreground: 45 90% 25%; /* Dark text on warning */
+    --destructive: 0 75% 60%; /* Clear Red - For alerts, destructive actions */
     --destructive-foreground: 0 0% 98%;
     --border: 210 30% 88%;
-    --input: 210 30% 92%;
-    --ring: 210 88% 68%; /* Primary color for ring */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --input: 210 40% 92%;
+    --ring: 210 70% 56%; /* Primary color for ring */
+    --chart-1: 210 70% 65%;
+    --chart-2: 150 50% 55%;
+    --chart-3: 260 50% 70%;
+    --chart-4: 45 80% 60%;
+    --chart-5: 180 40% 60%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 231 62% 29%; /* Dark Blue: #1A237E */
-    --foreground: 210 40% 95%; /* Light grayish blue for text */
-    --card: 230 50% 34%; /* Darker card background */
-    --card-foreground: 210 40% 95%;
-    --popover: 230 50% 34%;
-    --popover-foreground: 210 40% 95%;
-    --primary: 210 88% 68%; /* Calm Blue: #64B5F6 */
-    --primary-foreground: 230 60% 15%; /* Very dark blue for text on primary */
-    --secondary: 230 50% 40%; /* Muted dark background */
-    --secondary-foreground: 210 40% 95%;
-    --muted: 230 40% 40%;
-    --muted-foreground: 210 30% 75%; /* Muted light text */
-    --accent: 46 100% 65%; /* Vibrant Yellow: #FFD54F */
-    --accent-foreground: 45 90% 20%; /* Dark brown/yellow for text on accent */
-    --destructive: 0 62.8% 30.6%;
+    --background: 220 30% 12%; /* Deep Navy - Immersive, reduces eye strain */
+    --foreground: 210 40% 88%; /* Light Grayish Blue - Soft text */
+    --card: 220 30% 18%; /* Darker Navy - For cards */
+    --card-foreground: 210 40% 88%;
+    --popover: 220 30% 18%;
+    --popover-foreground: 210 40% 88%;
+    --primary: 210 70% 65%; /* Brighter Blue (on dark) - For Focus state */
+    --primary-foreground: 210 20% 15%; /* Dark text on primary */
+    --secondary: 220 25% 28%; /* Muted Dark Blue - Secondary elements */
+    --secondary-foreground: 210 35% 80%;
+    --muted: 220 20% 25%;
+    --muted-foreground: 210 30% 65%;
+    --accent: 150 55% 55%; /* Muted Teal/Green (on dark) - For Short Breaks */
+    --accent-foreground: 150 20% 10%; /* Dark text on accent */
+    --long-break: 260 50% 55%; /* Muted Lavender (on dark) - For Long Breaks */
+    --long-break-foreground: 260 20% 90%; /* Light text for long break */
+    --warning: 45 80% 55%; /* Slightly less bright yellow for dark mode */
+    --warning-foreground: 45 85% 15%; /* Darker text on warning for dark */
+    --destructive: 0 65% 58%; /* Softer Red (on dark) */
     --destructive-foreground: 0 0% 98%;
-    --border: 230 30% 48%;
-    --input: 230 30% 44%;
-    --ring: 210 88% 68%; /* Primary color for ring */
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --border: 220 20% 30%;
+    --input: 220 20% 26%;
+    --ring: 210 70% 65%; /* Primary color for ring */
+    --chart-1: 210 60% 70%;
+    --chart-2: 150 45% 60%;
+    --chart-3: 260 40% 60%;
+    --chart-4: 45 70% 65%;
+    --chart-5: 180 35% 65%;
   }
 }
 

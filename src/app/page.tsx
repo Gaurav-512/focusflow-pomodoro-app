@@ -10,6 +10,7 @@ import { useTimer } from '@/providers/TimerProvider';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { SessionType } from '@/lib/constants';
 
 export default function HomePage() {
   const { currentSession } = useTimer();
@@ -22,12 +23,12 @@ export default function HomePage() {
 
   const getCardColor = () => {
     switch (currentSession) {
-      case 'Focus':
+      case SessionType.FOCUS:
         return 'bg-primary/10 border-primary/30';
-      case 'Short Break':
-        return 'bg-green-500/10 border-green-500/30';
-      case 'Long Break':
-        return 'bg-blue-500/10 border-blue-500/30';
+      case SessionType.SHORT_BREAK:
+        return 'bg-accent/10 border-accent/30';
+      case SessionType.LONG_BREAK:
+        return 'bg-[hsl(var(--long-break))]/10 border-[hsl(var(--long-break))]/30';
       default:
         return 'bg-card';
     }
@@ -36,15 +37,18 @@ export default function HomePage() {
   return (
     <div className="flex flex-col items-center justify-center py-8 space-y-8">
       {permissionStatus === 'default' && (
-        <Card className="w-full max-w-md bg-yellow-100 dark:bg-yellow-900 border-yellow-400">
+        <Card className="w-full max-w-md bg-[hsl(var(--warning))]/10 border-[hsl(var(--warning))]/30">
           <CardHeader>
-            <CardTitle className="text-yellow-700 dark:text-yellow-300">Enable Notifications</CardTitle>
+            <CardTitle className="text-[hsl(var(--warning-foreground))]">Enable Notifications</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-yellow-600 dark:text-yellow-200 mb-4">
+            <p className="text-[hsl(var(--warning-foreground))]/80 mb-4">
               To get alerts when your sessions end, please enable browser notifications.
             </p>
-            <Button onClick={requestNotificationPermission} variant="default" className="bg-yellow-500 hover:bg-yellow-600 text-white">
+            <Button 
+              onClick={requestNotificationPermission} 
+              className="bg-[hsl(var(--warning))] hover:bg-[hsl(var(--warning))]/90 text-[hsl(var(--warning-foreground))]"
+            >
               Enable Notifications
             </Button>
           </CardContent>
