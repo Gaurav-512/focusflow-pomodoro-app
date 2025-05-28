@@ -5,20 +5,75 @@ import { TimerDisplay } from '@/components/TimerDisplay';
 import { TimerControls } from '@/components/TimerControls';
 import { PomodoroCounter } from '@/components/PomodoroCounter';
 import { StreakCounter } from '@/components/StreakCounter';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { useTimer } from '@/providers/TimerProvider';
 import { useNotifications } from '@/hooks/useNotifications';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { SessionType } from '@/lib/constants';
+import { Download } from 'lucide-react';
+
+// Interface for the BeforeInstallPromptEvent
+interface BeforeInstallPromptEvent extends Event {
+  readonly platforms: string[];
+  readonly userChoice: Promise<{
+    outcome: 'accepted' | 'dismissed';
+    platform: string;
+  }>;
+  prompt(): Promise<void>;
+}
 
 export default function HomePage() {
   const { currentSession } = useTimer();
   const { permissionStatus, requestNotificationPermission } = useNotifications();
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showInstallButton, setShowInstallButton] = useState(false);
 
   useEffect(() => {
     document.title = `FocusFlow | ${currentSession}`;
   }, [currentSession]);
+
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later.
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      // Update UI to notify the user they can add to home screen
+      setShowInstallButton(true);
+      console.log('`beforeinstallprompt` event was fired.');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    // Listen for appinstalled event
+    const handleAppInstalled = () => {
+      console.log('FocusFlow PWA was installed');
+      // Hide the install button if the app is installed
+      setShowInstallButton(false);
+      setDeferredPrompt(null);
+    };
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) {
+      return;
+    }
+    // Show the install prompt
+    deferredPrompt.prompt();
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+    // We've used the prompt, and can't use it again, discard it
+    setDeferredPrompt(null);
+    setShowInstallButton(false);
+  };
 
 
   const getCardColor = () => {
@@ -52,6 +107,29 @@ export default function HomePage() {
               Enable Notifications
             </Button>
           </CardContent>
+        </Card>
+      )}
+
+      {showInstallButton && (
+        <Card className="w-full max-w-md shadow-lg bg-secondary/20 border-secondary/40">
+          <CardHeader>
+            <CardTitle className="flex items-center text-secondary-foreground">
+              <Download className="mr-2 h-5 w-5" /> Install FocusFlow
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-secondary-foreground/80 mb-4">
+              Get the best experience by installing FocusFlow to your device.
+            </p>
+          </CardContent>
+          <CardFooter>
+            <Button 
+              onClick={handleInstallClick} 
+              className="w-full bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+            >
+              Install App
+            </Button>
+          </CardFooter>
         </Card>
       )}
 
