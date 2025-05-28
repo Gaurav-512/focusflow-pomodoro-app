@@ -18,17 +18,23 @@ export function DigitalClock({ size = 200 }: DigitalClockProps) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: true, // Use 12-hour format
+        hour12: true, 
       };
-      // Use 'en-US' locale for conventional AM/PM display
       setFormattedISTTime(now.toLocaleTimeString('en-US', options));
     };
 
-    updateISTTime(); // Initial set
+    updateISTTime(); 
     const timerId = setInterval(updateISTTime, 1000);
 
     return () => clearInterval(timerId);
   }, []);
+
+  // Adjust font size based on the clock size for better scaling
+  const fontSizeClass = () => {
+    if (size <= 120) return 'text-xl sm:text-2xl'; // For very small clocks
+    if (size <= 160) return 'text-2xl sm:text-3xl'; // For small clocks
+    return 'text-3xl sm:text-4xl'; // For default/larger clocks
+  };
 
   return (
     <div
@@ -36,10 +42,9 @@ export function DigitalClock({ size = 200 }: DigitalClockProps) {
       style={{ width: `${size}px`, height: `${size}px` }}
       aria-label="Current time in IST"
     >
-      <span className="font-mono text-3xl sm:text-4xl font-bold text-foreground tabular-nums">
+      <span className={`font-mono font-bold text-foreground tabular-nums ${fontSizeClass()}`}>
         {formattedISTTime}
       </span>
     </div>
   );
 }
-

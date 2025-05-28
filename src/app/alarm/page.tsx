@@ -23,47 +23,36 @@ export default function AlarmPage() {
 
   useEffect(() => {
     setIsMounted(true);
-  }, []); // Runs only once on mount
+  }, []); 
 
   useEffect(() => {
-    if (!isMounted) return; // Don't run if not mounted yet
+    if (!isMounted) return; 
 
-    // Sync selection fields if an alarm exists and is enabled
     if (alarm && alarm.isEnabled) {
       let hour12 = alarm.hour % 12;
-      if (hour12 === 0) hour12 = 12; // 0 or 12 AM/PM should be 12 for display
+      if (hour12 === 0) hour12 = 12; 
       setSelectedHour(hour12.toString().padStart(2, '0'));
       setSelectedMinute(alarm.minute.toString().padStart(2, '0'));
       setSelectedAmPm(alarm.hour >= 12 && alarm.hour < 24 ? 'PM' : 'AM');
-    } else if (isMounted && !alarm?.isEnabled) {
-        // Optionally reset to a default if alarm is cleared/null while on page
-        // and component is mounted. This prevents resetting on initial load if no alarm exists.
-        // setSelectedHour("07");
-        // setSelectedMinute("30");
-        // setSelectedAmPm("AM");
     }
-  }, [alarm, isMounted]); // Re-run if alarm state changes or component mounts
+  }, [alarm, isMounted]);
 
 
   const handleSetAlarm = () => {
     let hour24 = parseInt(selectedHour, 10);
     if (selectedAmPm === 'PM' && hour24 !== 12) {
       hour24 += 12;
-    } else if (selectedAmPm === 'AM' && hour24 === 12) { // 12 AM is 00 hours
+    } else if (selectedAmPm === 'AM' && hour24 === 12) { 
       hour24 = 0;
     }
 
     const minute = parseInt(selectedMinute, 10);
     
     const now = new Date();
-    // Create alarm time for today to compare
     const alarmTimeToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour24, minute, 0, 0);
 
     let toastMessage = `Alarm set for ${selectedHour}:${selectedMinute} ${selectedAmPm}.`;
 
-    // Check if the set time is in the past for today
-    // Also ensure it's not the *exact* current minute (e.g., setting for 10:30 when it's 10:30:05)
-    // to avoid immediately saying "time has passed" if setting for the current minute.
     if (alarmTimeToday.getTime() < now.getTime() && 
         !(now.getHours() === hour24 && now.getMinutes() === minute)) {
       toastMessage = `Alarm set for ${selectedHour}:${selectedMinute} ${selectedAmPm}. This time has passed for today; it will ring on the next occurrence.`;
@@ -89,21 +78,28 @@ export default function AlarmPage() {
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-150px)] p-4 bg-background">
       <Card className="w-full max-w-md shadow-2xl bg-card">
         <CardHeader className="text-center">
-          <CardTitle className="text-4xl font-[--font-poppins] font-bold flex items-center justify-center text-foreground">
-            <BellRing className="mr-3 h-10 w-10 text-primary" /> FocusFlow Alarm
+          <CardTitle className="text-3xl sm:text-4xl font-[--font-poppins] font-bold flex items-center justify-center text-foreground">
+            <BellRing className="mr-2 sm:mr-3 h-8 w-8 sm:h-10 sm:w-10 text-primary" /> FocusFlow Alarm
           </CardTitle>
           <CardDescription className="text-muted-foreground pt-2">
             {isRinging ? "Alarm is ringing!" : (isAlarmSet && formattedAlarmTime ? `Next alarm at ${formattedAlarmTime}` : "Set your alarm to stay on track.")}
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-col items-center space-y-8">
-          <DigitalClock size={200} />
+        <CardContent className="flex flex-col items-center space-y-6 sm:space-y-8">
+          {/* Responsive DigitalClock size */}
+          <div className="block sm:hidden">
+            <DigitalClock size={160} />
+          </div>
+          <div className="hidden sm:block">
+            <DigitalClock size={200} />
+          </div>
+
 
           {!isRinging && (
             <div className="w-full space-y-4">
-              <div className="flex justify-around items-end space-x-2">
+              <div className="flex justify-around items-end space-x-1 sm:space-x-2">
                 <div className="flex-1">
-                  <Label htmlFor="hour-select" className="text-sm font-medium text-muted-foreground">Hour</Label>
+                  <Label htmlFor="hour-select" className="text-xs sm:text-sm font-medium text-muted-foreground">Hour</Label>
                   <Select value={selectedHour} onValueChange={setSelectedHour}>
                     <SelectTrigger id="hour-select" className="w-full">
                       <SelectValue placeholder="Hour" />
@@ -115,9 +111,9 @@ export default function AlarmPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <span className="text-3xl font-mono pb-1 text-muted-foreground">:</span>
+                <span className="text-2xl sm:text-3xl font-mono pb-1 text-muted-foreground">:</span>
                 <div className="flex-1">
-                  <Label htmlFor="minute-select" className="text-sm font-medium text-muted-foreground">Minute</Label>
+                  <Label htmlFor="minute-select" className="text-xs sm:text-sm font-medium text-muted-foreground">Minute</Label>
                   <Select value={selectedMinute} onValueChange={setSelectedMinute}>
                     <SelectTrigger id="minute-select" className="w-full">
                       <SelectValue placeholder="Minute" />
@@ -130,7 +126,7 @@ export default function AlarmPage() {
                   </Select>
                 </div>
                 <div className="flex-1">
-                  <Label htmlFor="ampm-select" className="text-sm font-medium text-muted-foreground">AM/PM</Label>
+                  <Label htmlFor="ampm-select" className="text-xs sm:text-sm font-medium text-muted-foreground">AM/PM</Label>
                   <Select value={selectedAmPm} onValueChange={setSelectedAmPm}>
                     <SelectTrigger id="ampm-select" className="w-full">
                       <SelectValue placeholder="AM/PM" />
@@ -144,7 +140,7 @@ export default function AlarmPage() {
               </div>
               <Button
                 onClick={handleSetAlarm}
-                size="lg"
+                size="lg" // Keeps it large as it's the primary action
                 className="w-full text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105"
               >
                 <BellRing className="mr-2 h-5 w-5" /> Set Alarm
@@ -155,7 +151,7 @@ export default function AlarmPage() {
           {isRinging && (
             <Button
               onClick={dismissAlarm}
-              size="lg"
+              size="lg" // Keeps it large
               variant="destructive"
               className="w-full text-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 animate-pulse"
             >
@@ -167,7 +163,6 @@ export default function AlarmPage() {
         <CardFooter className="flex flex-col items-center justify-center pt-6 space-y-3">
           {isAlarmSet && formattedAlarmTime && !isRinging ? (
             <div className="text-center">
-              {/* "Next Alarm" is now part of CardDescription, so this specific display might be redundant or could be styled differently if kept */}
               <Button onClick={clearAlarm} variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground/80 mt-1">
                 <BellOff className="mr-2 h-4 w-4" /> Cancel Alarm
               </Button>

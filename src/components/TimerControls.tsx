@@ -9,23 +9,48 @@ export function TimerControls() {
   const { isRunning, startTimer, pauseTimer, resetTimer, skipSession } = useTimer();
 
   return (
-    <div className="flex items-center space-x-3 sm:space-x-4">
+    <div className="flex items-center space-x-2 sm:space-x-4">
       {!isRunning ? (
-        <Button onClick={startTimer} size="lg" className="px-8 py-6 text-lg rounded-full shadow-md hover:shadow-lg transition-shadow bg-primary hover:bg-primary/90" aria-label="Start timer">
-          <Play className="h-6 w-6 mr-2" />
+        <Button 
+          onClick={startTimer} 
+          size="default" 
+          className="px-6 py-5 text-md sm:px-8 sm:py-6 sm:text-lg rounded-full shadow-md hover:shadow-lg transition-shadow bg-primary hover:bg-primary/90" 
+          aria-label="Start timer"
+        >
+          <Play className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
           Start
         </Button>
       ) : (
-        <Button onClick={pauseTimer} size="lg" variant="secondary" className="px-8 py-6 text-lg rounded-full shadow-md hover:shadow-lg transition-shadow" aria-label="Pause timer">
-          <Pause className="h-6 w-6 mr-2" />
+        <Button 
+          onClick={pauseTimer} 
+          size="default" 
+          variant="secondary" 
+          className="px-6 py-5 text-md sm:px-8 sm:py-6 sm:text-lg rounded-full shadow-md hover:shadow-lg transition-shadow" 
+          aria-label="Pause timer"
+        >
+          <Pause className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
           Pause
         </Button>
       )}
-      <Button onClick={resetTimer} variant="outline" size="lg" className="px-6 py-6 text-lg rounded-full shadow-md hover:shadow-lg transition-shadow" aria-label="Reset timer">
+      <Button 
+        onClick={resetTimer} 
+        variant="outline" 
+        size="default" 
+        className="p-3 sm:p-4 text-md sm:text-lg rounded-full shadow-md hover:shadow-lg transition-shadow aspect-square h-auto sm:px-6 sm:py-6" 
+        aria-label="Reset timer"
+      >
         <RotateCcw className="h-5 w-5" />
+         <span className="sr-only sm:not-sr-only sm:ml-2">Reset</span>
       </Button>
-      <Button onClick={skipSession} variant="ghost" size="lg" className="px-6 py-6 text-lg rounded-full" aria-label="Skip session">
+      <Button 
+        onClick={skipSession} 
+        variant="ghost" 
+        size="default" 
+        className="p-3 sm:p-4 text-md sm:text-lg rounded-full aspect-square h-auto sm:px-6 sm:py-6" 
+        aria-label="Skip session"
+      >
         <SkipForward className="h-5 w-5" />
+        <span className="sr-only sm:not-sr-only sm:ml-2">Skip</span>
       </Button>
     </div>
   );
