@@ -54,9 +54,10 @@ export const DAYS_OF_WEEK = [
   "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
 ];
 
-// New type for stored alarm
+// Updated type for stored alarm
 export interface StoredAlarm {
   hour: number;
   minute: number;
   isEnabled: boolean;
+  isExplicitlyRinging?: boolean; // Flag to indicate the alarm has triggered and is "ringing"
 }

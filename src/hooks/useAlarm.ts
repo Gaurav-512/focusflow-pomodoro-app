@@ -8,18 +8,16 @@ import { playAlarmSound, stopAlarmSound } from '@/lib/soundUtils';
 import { LOCAL_STORAGE_KEYS, StoredAlarm } from '@/lib/constants';
 import { useSettings } from '@/providers/SettingsProvider';
 
-const initialAlarmState: StoredAlarm | null = null;
-
 export const useAlarm = () => {
   const [storedAlarm, setStoredAlarm] = useLocalStorage<StoredAlarm | null>(
     LOCAL_STORAGE_KEYS.ALARM,
-    initialAlarmState
+    null // Initial value is null
   );
-  const [isRinging, setIsRinging] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const { sendNotification, requestNotificationPermission, permissionStatus } = useNotifications();
-  const { settings } = useSettings(); // To check if sound is muted
+  const { settings } = useSettings();
 
+  // Update current time every second
   useEffect(() => {
     const timerId = setInterval(() => {
       setCurrentTime(new Date());
@@ -27,75 +25,86 @@ export const useAlarm = () => {
     return () => clearInterval(timerId);
   }, []);
   
+  // Request notification permission if needed
   useEffect(() => {
     if (permissionStatus === 'default') {
         requestNotificationPermission();
     }
   }, [permissionStatus, requestNotificationPermission]);
 
-  const setAlarm = useCallback((hour: number, minute: number) => {
-    const newAlarm: StoredAlarm = { hour, minute, isEnabled: true };
-    setStoredAlarm(newAlarm);
-    setIsRinging(false); // Ensure ringing stops if a new alarm is set
-    stopAlarmSound();
-  }, [setStoredAlarm]);
-
-  const clearAlarm = useCallback(() => {
-    setStoredAlarm(null);
-    setIsRinging(false);
-    stopAlarmSound();
-  }, [setStoredAlarm]);
-
-  const dismissAlarm = useCallback(() => {
-    setIsRinging(false);
-    stopAlarmSound();
-    if (storedAlarm) {
-      setStoredAlarm({ ...storedAlarm, isEnabled: false });
-    }
-  }, [storedAlarm, setStoredAlarm]);
-
+  // Effect to check time and set storedAlarm.isExplicitlyRinging
   useEffect(() => {
-    if (storedAlarm && storedAlarm.isEnabled && !isRinging) {
+    if (storedAlarm && storedAlarm.isEnabled && !storedAlarm.isExplicitlyRinging) {
       const now = currentTime;
-      const alarmHour = storedAlarm.hour;
-      const alarmMinute = storedAlarm.minute;
-
-      if (now.getHours() === alarmHour && now.getMinutes() === alarmMinute && now.getSeconds() === 0) {
-        setIsRinging(true);
-        sendNotification("⏰ Alarm Time! Wake up!", {
-          body: "Your scheduled alarm is ringing.",
-          tag: `focusflow-alarm-${alarmHour}-${alarmMinute}`
-        });
-        playAlarmSound(settings.isMuted);
+      if (now.getHours() === storedAlarm.hour && now.getMinutes() === storedAlarm.minute && now.getSeconds() === 0) {
+        // Update localStorage to mark alarm as ringing
+        setStoredAlarm(prev => prev ? { ...prev, isExplicitlyRinging: true } : null);
       }
     }
-  }, [currentTime, storedAlarm, isRinging, sendNotification, settings.isMuted]);
-  
+  }, [currentTime, storedAlarm, setStoredAlarm]);
+
+  // Effect to react to storedAlarm.isExplicitlyRinging for sound and notification
   useEffect(() => {
-    return () => {
+    if (storedAlarm?.isExplicitlyRinging && storedAlarm?.isEnabled) {
+      sendNotification("⏰ Alarm Time! Wake up!", {
+        body: "Your scheduled alarm is ringing.",
+        tag: `focusflow-alarm-${storedAlarm.hour}-${storedAlarm.minute}`
+      });
+      playAlarmSound(settings.isMuted);
+    } else {
+      // If alarm is no longer enabled or no longer explicitly ringing, stop sound.
+      // This handles cases like clearAlarm or dismissAlarm.
       stopAlarmSound();
-    };
-  }, []);
+    }
+    // No explicit cleanup needed for playAlarmSound as it handles its own interval.
+    // stopAlarmSound in the 'else' branch handles stopping.
+  }, [
+    storedAlarm?.isExplicitlyRinging, 
+    storedAlarm?.isEnabled, 
+    sendNotification, 
+    settings.isMuted,
+    storedAlarm?.hour, // For unique notification tag
+    storedAlarm?.minute // For unique notification tag
+  ]);
+
+  const setAlarmCallback = useCallback((hour: number, minute: number) => {
+    const newAlarm: StoredAlarm = { hour, minute, isEnabled: true, isExplicitlyRinging: false };
+    setStoredAlarm(newAlarm);
+    stopAlarmSound(); // Ensure any previous ringing stops
+  }, [setStoredAlarm]);
+
+  const clearAlarmCallback = useCallback(() => {
+    // This will make storedAlarm null, leading to isEnabled=false and isExplicitlyRinging=false effectively
+    setStoredAlarm(null); 
+    // The effect reacting to isExplicitlyRinging/isEnabled will call stopAlarmSound()
+  }, [setStoredAlarm]);
+
+  const dismissAlarmCallback = useCallback(() => {
+    // Mark as no longer enabled and no longer ringing in localStorage
+    setStoredAlarm(prev => prev ? { ...prev, isEnabled: false, isExplicitlyRinging: false } : null);
+    // The effect reacting to isExplicitlyRinging/isEnabled will call stopAlarmSound()
+  }, [setStoredAlarm]);
 
   const formatTo12Hour = (hour: number, minute: number): string => {
-    const h = hour % 12 || 12; // Convert 0 or 12 to 12
+    const h = hour % 12 || 12;
     const m = minute.toString().padStart(2, '0');
-    const ampm = hour < 12 || hour === 24 ? 'AM' : 'PM'; // hour 24 is 12 AM next day, but usually 0 used for midnight
+    const ampm = hour < 12 || hour === 24 ? 'AM' : 'PM';
     return `${h.toString().padStart(2, '0')}:${m} ${ampm}`;
   };
 
-  const formattedAlarmTime = storedAlarm && storedAlarm.isEnabled
+  const formattedAlarmTime = storedAlarm && storedAlarm.isEnabled && !storedAlarm.isExplicitlyRinging
     ? formatTo12Hour(storedAlarm.hour, storedAlarm.minute)
     : null;
 
   return {
     alarm: storedAlarm,
-    isAlarmSet: !!storedAlarm && storedAlarm.isEnabled,
-    isRinging,
-    setAlarm,
-    clearAlarm,
-    dismissAlarm,
+    // True if an alarm is set, enabled, AND NOT currently explicitly ringing
+    isAlarmSet: !!(storedAlarm && storedAlarm.isEnabled && !storedAlarm.isExplicitlyRinging),
+    // True if an alarm is set, enabled, AND is currently explicitly ringing
+    isRinging: !!(storedAlarm && storedAlarm.isEnabled && storedAlarm.isExplicitlyRinging),
+    setAlarm: setAlarmCallback,
+    clearAlarm: clearAlarmCallback,
+    dismissAlarm: dismissAlarmCallback,
     formattedAlarmTime,
   };
 };
-
