@@ -19,15 +19,20 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T>] {
         if (item !== null) { // Check for null explicitly
           setStoredValue(JSON.parse(item));
         } else {
-          setStoredValue(initialValue); // Set to initialValue if nothing is in localStorage
+          // If initialValue is a function, call it to get the value
+          const valueToStore = initialValue instanceof Function ? initialValue() : initialValue;
+          setStoredValue(valueToStore); 
+          window.localStorage.setItem(key, JSON.stringify(valueToStore)); // Persist initialValue if not found
         }
       } catch (error) {
         console.error(`Error reading localStorage key "${key}":`, error);
-        setStoredValue(initialValue); // Fallback to initialValue on error
+        const valueToStore = initialValue instanceof Function ? initialValue() : initialValue;
+        setStoredValue(valueToStore); // Fallback to initialValue on error
       }
       setIsInitialized(true);
     }
-  }, [key, initialValue]); // initialValue added as dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]); // Only re-run if key changes. initialValue is for the very first load.
 
   // Effect to listen for custom event to sync across hook instances on the same page
   useEffect(() => {
@@ -37,7 +42,14 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T>] {
     
     const handleCustomStorageChange = (event: Event) => {
       if (event instanceof CustomEvent && 'detail' in event) {
-        setStoredValue(event.detail as T);
+        const newValueFromEvent = event.detail as T;
+        // Crucial: Only update if the stringified value is different to avoid unnecessary re-renders from object reference changes.
+        setStoredValue(currentVal => {
+          if (JSON.stringify(currentVal) !== JSON.stringify(newValueFromEvent)) {
+            return newValueFromEvent;
+          }
+          return currentVal; // No change
+        });
       }
     };
     
@@ -45,14 +57,16 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T>] {
     const handleStandardStorageEvent = (event: StorageEvent) => {
         if (event.key === key) {
             try {
+                const valueToStore = initialValue instanceof Function ? initialValue() : initialValue;
                 if (event.newValue === null) {
-                    setStoredValue(initialValue);
+                    setStoredValue(valueToStore);
                 } else {
                     setStoredValue(JSON.parse(event.newValue));
                 }
             } catch (error) {
                 console.error(`Error parsing storage event for key "${key}":`, error);
-                setStoredValue(initialValue);
+                const valueToStore = initialValue instanceof Function ? initialValue() : initialValue;
+                setStoredValue(valueToStore);
             }
         }
     };
@@ -64,25 +78,27 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T>] {
       window.removeEventListener(eventName, handleCustomStorageChange);
       window.removeEventListener('storage', handleStandardStorageEvent);
     };
-  }, [key, initialValue, isInitialized]);
+  }, [key, initialValue, isInitialized]); // initialValue included here as it might affect the initial value if key changes.
 
   const setValue: SetValue<T> = useCallback(
     (valueOrUpdater) => {
       if (typeof window === 'undefined') return;
 
-      // To get the latest state if valueOrUpdater is a function, we use setStoredValue's callback form
-      // This also helps if storedValue in useCallback's closure is stale.
       let valueToStore: T;
-      setStoredValue(currentStoredValue => {
+      setStoredValue(currentStoredValue => { // Functional update for the current hook instance
         valueToStore = valueOrUpdater instanceof Function ? valueOrUpdater(currentStoredValue) : valueOrUpdater;
         
-        // Only write to localStorage and dispatch event if initialized
-        // This check might be redundant if setValue is only called after initialization elsewhere,
-        // but it's safer here.
         if (isInitialized) { 
           try {
-            window.localStorage.setItem(key, JSON.stringify(valueToStore));
-            window.dispatchEvent(new CustomEvent(`${LOCAL_STORAGE_CHANGE_EVENT_PREFIX}${key}`, { detail: valueToStore }));
+            const oldValueString = window.localStorage.getItem(key);
+            const newValueString = JSON.stringify(valueToStore);
+
+            // Only update localStorage and dispatch event if the stringified value actually changes.
+            if (oldValueString !== newValueString) {
+                window.localStorage.setItem(key, newValueString);
+                // Dispatch event with the actual valueToStore (object), not the string
+                window.dispatchEvent(new CustomEvent(`${LOCAL_STORAGE_CHANGE_EVENT_PREFIX}${key}`, { detail: valueToStore }));
+            }
           } catch (error) {
             console.error(`Error setting localStorage key "${key}":`, error);
           }
@@ -90,10 +106,10 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T>] {
         return valueToStore;
       });
     },
-    [key, isInitialized] // Removed storedValue from deps, relying on setStoredValue's functional update
+    [key, isInitialized] 
   );
   
-  return [isInitialized ? storedValue : initialValue, setValue];
+  return [isInitialized ? storedValue : (initialValue instanceof Function ? initialValue() : initialValue), setValue];
 }
 
 export default useLocalStorage;
