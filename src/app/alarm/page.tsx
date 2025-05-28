@@ -126,7 +126,7 @@ export default function AlarmPage() {
                 Next Alarm: {formattedAlarmTime}
               </p>
               <Button onClick={clearAlarm} variant="ghost" size="sm" className="text-amber-400 hover:text-amber-500 mt-2">
-                <BellOff className="mr-2 h-4 w-4" /> Clear Alarm
+                <BellOff className="mr-2 h-4 w-4" /> Cancel Alarm
               </Button>
             </div>
           ) : (
@@ -143,3 +143,4 @@ export default function AlarmPage() {
     </div>
   );
 }
+
