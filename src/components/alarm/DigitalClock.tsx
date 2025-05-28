@@ -18,11 +18,10 @@ export function DigitalClock({ size = 200 }: DigitalClockProps) {
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
-        hour12: false, // Using 24-hour format
+        hour12: true, // Use 12-hour format
       };
-      // 'en-IN' or 'en-GB' often used for 24-hour format display.
-      // Or rely on browser's default for 'en-US' with hour12: false.
-      setFormattedISTTime(now.toLocaleTimeString('en-GB', options));
+      // Use 'en-US' locale for conventional AM/PM display
+      setFormattedISTTime(now.toLocaleTimeString('en-US', options));
     };
 
     updateISTTime(); // Initial set
@@ -37,9 +36,10 @@ export function DigitalClock({ size = 200 }: DigitalClockProps) {
       style={{ width: `${size}px`, height: `${size}px` }}
       aria-label="Current time in IST"
     >
-      <span className="font-mono text-4xl font-bold text-foreground tabular-nums">
+      <span className="font-mono text-3xl sm:text-4xl font-bold text-foreground tabular-nums">
         {formattedISTTime}
       </span>
     </div>
   );
 }
+

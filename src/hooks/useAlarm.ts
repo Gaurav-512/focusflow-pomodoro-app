@@ -49,7 +49,6 @@ export const useAlarm = () => {
   const dismissAlarm = useCallback(() => {
     setIsRinging(false);
     stopAlarmSound();
-    // Optionally, disable the alarm after dismissal or require re-set
     if (storedAlarm) {
       setStoredAlarm({ ...storedAlarm, isEnabled: false });
     }
@@ -72,15 +71,21 @@ export const useAlarm = () => {
     }
   }, [currentTime, storedAlarm, isRinging, sendNotification, settings.isMuted]);
   
-  // Cleanup sound on unmount
   useEffect(() => {
     return () => {
       stopAlarmSound();
     };
   }, []);
 
-  const formattedAlarmTime = storedAlarm
-    ? `${storedAlarm.hour.toString().padStart(2, '0')}:${storedAlarm.minute.toString().padStart(2, '0')}`
+  const formatTo12Hour = (hour: number, minute: number): string => {
+    const h = hour % 12 || 12; // Convert 0 or 12 to 12
+    const m = minute.toString().padStart(2, '0');
+    const ampm = hour < 12 || hour === 24 ? 'AM' : 'PM'; // hour 24 is 12 AM next day, but usually 0 used for midnight
+    return `${h.toString().padStart(2, '0')}:${m} ${ampm}`;
+  };
+
+  const formattedAlarmTime = storedAlarm && storedAlarm.isEnabled
+    ? formatTo12Hour(storedAlarm.hour, storedAlarm.minute)
     : null;
 
   return {
@@ -93,3 +98,4 @@ export const useAlarm = () => {
     formattedAlarmTime,
   };
 };
+
