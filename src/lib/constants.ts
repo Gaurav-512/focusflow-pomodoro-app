@@ -16,7 +16,8 @@ export const SESSIONS_BEFORE_LONG_BREAK = 4;
 export const LOCAL_STORAGE_KEYS = {
   SETTINGS: 'focusflow_settings',
   STATS: 'focusflow_stats',
-  TIMETABLE: 'focusflow_timetable', // New key for timetable
+  TIMETABLE: 'focusflow_timetable',
+  ALARM: 'focusflow_alarm', // New key for alarm
 };
 
 export type Settings = {
@@ -40,7 +41,6 @@ export type Stats = {
   lastCompletedDate: string | null;
 };
 
-// New Timetable Entry Type
 export interface TimetableEntry {
   id: string;
   subject: string;
@@ -53,3 +53,10 @@ export interface TimetableEntry {
 export const DAYS_OF_WEEK = [
   "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
 ];
+
+// New type for stored alarm
+export interface StoredAlarm {
+  hour: number;
+  minute: number;
+  isEnabled: boolean;
+}

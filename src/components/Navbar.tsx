@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Settings, Sun, Moon, CalendarDays } from 'lucide-react'; // Added CalendarDays
+import { Home, Settings, Sun, Moon, CalendarDays, AlarmClock } from 'lucide-react'; // Added AlarmClock
 import { Button } from '@/components/ui/button';
 import { useTheme } from 'next-themes';
 import { useEffect, useState } from 'react';
@@ -45,6 +45,12 @@ export function Navbar() {
             <Button variant={isActive('/') ? 'default' : 'ghost'} size="sm" aria-label="Timer Page">
               <Home className="h-5 w-5 sm:mr-2" />
               <span className="hidden sm:inline">Timer</span>
+            </Button>
+          </Link>
+          <Link href="/alarm" passHref>
+            <Button variant={isActive('/alarm') ? 'default' : 'ghost'} size="sm" aria-label="Alarm Page">
+              <AlarmClock className="h-5 w-5 sm:mr-2" />
+              <span className="hidden sm:inline">Alarm</span>
             </Button>
           </Link>
           <Link href="/timetable" passHref>
