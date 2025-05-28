@@ -38,10 +38,11 @@ export const useAlarm = () => {
       const now = currentTime;
       if (now.getHours() === storedAlarm.hour && now.getMinutes() === storedAlarm.minute && now.getSeconds() === 0) {
         // Update localStorage to mark alarm as ringing
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         setStoredAlarm(prev => prev ? { ...prev, isExplicitlyRinging: true } : null);
       }
     }
-  }, [currentTime, storedAlarm, setStoredAlarm]);
+  }, [currentTime, storedAlarm]); // Removed setStoredAlarm from dependencies
 
   // Effect to react to storedAlarm.isExplicitlyRinging for sound and notification
   useEffect(() => {
