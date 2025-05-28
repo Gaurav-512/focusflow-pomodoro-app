@@ -8,7 +8,8 @@ import { StatsProvider } from '@/providers/StatsProvider';
 import { TimerProvider } from '@/providers/TimerProvider';
 import { Navbar } from '@/components/Navbar';
 import { Toaster } from '@/components/ui/toaster';
-import { TimetableNotificationHandler } from '@/components/TimetableNotificationHandler'; // Added import
+import { TimetableNotificationHandler } from '@/components/TimetableNotificationHandler';
+import { AlarmHandler } from '@/components/AlarmHandler'; // Added import
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -29,6 +30,7 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: 'FocusFlow – Pomodoro Timer',
   description: 'Increase productivity with the Pomodoro technique.',
+  manifest: '/manifest.json', // Essential for PWA
 };
 
 export default function RootLayout({
@@ -43,7 +45,8 @@ export default function RootLayout({
           <SettingsProvider>
             <StatsProvider>
               <TimerProvider>
-                <TimetableNotificationHandler /> {/* Added component here */}
+                <TimetableNotificationHandler />
+                <AlarmHandler /> {/* Added AlarmHandler here */}
                 <div className="flex flex-col min-h-screen">
                   <Navbar />
                   <main className="flex-grow container mx-auto px-4 py-8">
