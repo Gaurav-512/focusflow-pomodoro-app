@@ -8,10 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { DigitalClock } from "@/components/alarm/DigitalClock";
 import { useAlarm } from "@/hooks/useAlarm";
+import { useToast } from "@/hooks/use-toast"; // Added import
 import { BellRing, BellOff, XCircle } from 'lucide-react';
 
 export default function AlarmPage() {
   const { alarm, isAlarmSet, isRinging, setAlarm, clearAlarm, dismissAlarm, formattedAlarmTime } = useAlarm();
+  const { toast } = useToast(); // Added hook usage
   const [selectedHour, setSelectedHour] = useState<string>("07");
   const [selectedMinute, setSelectedMinute] = useState<string>("30");
   const [isMounted, setIsMounted] = useState(false);
@@ -29,19 +31,23 @@ export default function AlarmPage() {
     const hour = parseInt(selectedHour, 10);
     const minute = parseInt(selectedMinute, 10);
     
-    // Basic validation: Prevent setting alarm for past time today (simple check)
-    // More complex logic could involve checking next day if past.
     const now = new Date();
-    const alarmDateToday = new Date();
-    alarmDateToday.setHours(hour, minute, 0, 0);
+    const alarmTimeToday = new Date();
+    alarmTimeToday.setHours(hour, minute, 0, 0);
 
-    if (alarmDateToday < now && !(now.getHours() === hour && now.getMinutes() === minute)) {
-      // If it's for today but already passed, set for tomorrow (conceptually)
-      // For this web version, we'll just set it. User can manage.
-      // Or show a toast: "Alarm time is in the past for today."
-      // For simplicity, we allow setting it. It will trigger next day or if time loops.
+    let toastMessage = "Alarm set for " + `${selectedHour}:${selectedMinute}` + ".";
+
+    if (alarmTimeToday < now && !(now.getHours() === hour && now.getMinutes() === minute)) {
+      // If the alarm time for today has already passed
+      toastMessage = `Alarm set for ${selectedHour}:${selectedMinute}. This time has passed for today; it will ring on the next occurrence.`;
     }
+    
     setAlarm(hour, minute);
+    toast({
+      title: "Alarm Status",
+      description: toastMessage,
+      duration: 5000,
+    });
   };
   
   if (!isMounted) {
