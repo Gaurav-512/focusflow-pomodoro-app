@@ -15,29 +15,34 @@ export default function AlarmPage() {
   const { alarm, isAlarmSet, isRinging, setAlarm, clearAlarm, dismissAlarm, formattedAlarmTime } = useAlarm();
   const { toast } = useToast();
   
-  // Default to a sensible time like 7:30 AM if no alarm is set or for new selection
-  const [selectedHour, setSelectedHour] = useState<string>(alarm && alarm.isEnabled ? (alarm.hour % 12 || 12).toString().padStart(2, '0') : "07");
-  const [selectedMinute, setSelectedMinute] = useState<string>(alarm && alarm.isEnabled ? alarm.minute.toString().padStart(2, '0') : "30");
-  const [selectedAmPm, setSelectedAmPm] = useState<string>(alarm && alarm.isEnabled ? (alarm.hour >= 12 && alarm.hour < 24 ? 'PM' : 'AM') : "AM");
+  const [selectedHour, setSelectedHour] = useState<string>("07");
+  const [selectedMinute, setSelectedMinute] = useState<string>("30");
+  const [selectedAmPm, setSelectedAmPm] = useState<string>("AM");
   
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
+  }, []); // Runs only once on mount
+
+  useEffect(() => {
+    if (!isMounted) return; // Don't run if not mounted yet
+
     // Sync selection fields if an alarm exists and is enabled
     if (alarm && alarm.isEnabled) {
       let hour12 = alarm.hour % 12;
-      if (hour12 === 0) hour12 = 12;
+      if (hour12 === 0) hour12 = 12; // 0 or 12 AM/PM should be 12 for display
       setSelectedHour(hour12.toString().padStart(2, '0'));
       setSelectedMinute(alarm.minute.toString().padStart(2, '0'));
       setSelectedAmPm(alarm.hour >= 12 && alarm.hour < 24 ? 'PM' : 'AM');
-    } else {
-      // Optionally reset to a default if alarm is cleared/null while on page
-      // setSelectedHour("07");
-      // setSelectedMinute("30");
-      // setSelectedAmPm("AM");
+    } else if (isMounted && !alarm?.isEnabled) {
+        // Optionally reset to a default if alarm is cleared/null while on page
+        // and component is mounted. This prevents resetting on initial load if no alarm exists.
+        // setSelectedHour("07");
+        // setSelectedMinute("30");
+        // setSelectedAmPm("AM");
     }
-  }, [alarm]);
+  }, [alarm, isMounted]); // Re-run if alarm state changes or component mounts
 
 
   const handleSetAlarm = () => {
@@ -51,12 +56,16 @@ export default function AlarmPage() {
     const minute = parseInt(selectedMinute, 10);
     
     const now = new Date();
+    // Create alarm time for today to compare
     const alarmTimeToday = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hour24, minute, 0, 0);
 
     let toastMessage = `Alarm set for ${selectedHour}:${selectedMinute} ${selectedAmPm}.`;
 
-    // Check if the set time is in the past for today, excluding the current minute itself (in case of quick re-set)
-    if (alarmTimeToday < now && !(now.getHours() === hour24 && now.getMinutes() === minute)) {
+    // Check if the set time is in the past for today
+    // Also ensure it's not the *exact* current minute (e.g., setting for 10:30 when it's 10:30:05)
+    // to avoid immediately saying "time has passed" if setting for the current minute.
+    if (alarmTimeToday.getTime() < now.getTime() && 
+        !(now.getHours() === hour24 && now.getMinutes() === minute)) {
       toastMessage = `Alarm set for ${selectedHour}:${selectedMinute} ${selectedAmPm}. This time has passed for today; it will ring on the next occurrence.`;
     }
     
@@ -84,7 +93,7 @@ export default function AlarmPage() {
             <BellRing className="mr-3 h-10 w-10 text-primary" /> FocusFlow Alarm
           </CardTitle>
           <CardDescription className="text-muted-foreground pt-2">
-            {isRinging ? "Alarm is ringing!" : "Set your alarm to stay on track."}
+            {isRinging ? "Alarm is ringing!" : (isAlarmSet && formattedAlarmTime ? `Next alarm at ${formattedAlarmTime}` : "Set your alarm to stay on track.")}
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-8">
@@ -158,17 +167,15 @@ export default function AlarmPage() {
         <CardFooter className="flex flex-col items-center justify-center pt-6 space-y-3">
           {isAlarmSet && formattedAlarmTime && !isRinging ? (
             <div className="text-center">
-              <p className="text-lg text-accent-foreground font-medium" style={{color: 'hsl(var(--accent))'}}>
-                Next Alarm: {formattedAlarmTime}
-              </p>
-              <Button onClick={clearAlarm} variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground/80 mt-2">
+              {/* "Next Alarm" is now part of CardDescription, so this specific display might be redundant or could be styled differently if kept */}
+              <Button onClick={clearAlarm} variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground/80 mt-1">
                 <BellOff className="mr-2 h-4 w-4" /> Cancel Alarm
               </Button>
             </div>
           ) : !isRinging && !isAlarmSet ? (
             <p className="text-muted-foreground">No alarm set.</p>
           ) : null}
-           {/* AdMob Placeholder - No changes needed here, but kept for context */}
+           {/* AdMob Placeholder */}
           {/* 
             <div id="admob-banner-alarm" style={{ width: '100%', textAlign: 'center', padding: '10px 0', marginTop: '20px', border: '1px dashed hsl(var(--border))' }}>
               [ AdMob Banner Ad Unit for Alarm Page ]
