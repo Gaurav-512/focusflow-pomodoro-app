@@ -8,30 +8,37 @@ interface DigitalClockProps {
 }
 
 export function DigitalClock({ size = 200 }: DigitalClockProps) {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [formattedISTTime, setFormattedISTTime] = useState<string>('');
 
   useEffect(() => {
-    const timerId = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
+    const updateISTTime = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = {
+        timeZone: 'Asia/Kolkata',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false, // Using 24-hour format
+      };
+      // 'en-IN' or 'en-GB' often used for 24-hour format display.
+      // Or rely on browser's default for 'en-US' with hour12: false.
+      setFormattedISTTime(now.toLocaleTimeString('en-GB', options));
+    };
+
+    updateISTTime(); // Initial set
+    const timerId = setInterval(updateISTTime, 1000);
+
     return () => clearInterval(timerId);
   }, []);
 
-  const formatTime = (date: Date) => {
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    const seconds = date.getSeconds().toString().padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
-  };
-
   return (
     <div
-      className="flex items-center justify-center rounded-full bg-slate-800/30 border-2 border-slate-700 shadow-2xl"
+      className="flex items-center justify-center rounded-full bg-card border-2 border-border shadow-xl"
       style={{ width: `${size}px`, height: `${size}px` }}
-      aria-label="Current time"
+      aria-label="Current time in IST"
     >
-      <span className="font-mono text-4xl font-bold text-slate-100 tabular-nums">
-        {formatTime(currentTime)}
+      <span className="font-mono text-4xl font-bold text-foreground tabular-nums">
+        {formattedISTTime}
       </span>
     </div>
   );

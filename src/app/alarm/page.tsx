@@ -8,12 +8,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { DigitalClock } from "@/components/alarm/DigitalClock";
 import { useAlarm } from "@/hooks/useAlarm";
-import { useToast } from "@/hooks/use-toast"; // Added import
+import { useToast } from "@/hooks/use-toast";
 import { BellRing, BellOff, XCircle } from 'lucide-react';
 
 export default function AlarmPage() {
   const { alarm, isAlarmSet, isRinging, setAlarm, clearAlarm, dismissAlarm, formattedAlarmTime } = useAlarm();
-  const { toast } = useToast(); // Added hook usage
+  const { toast } = useToast();
   const [selectedHour, setSelectedHour] = useState<string>("07");
   const [selectedMinute, setSelectedMinute] = useState<string>("30");
   const [isMounted, setIsMounted] = useState(false);
@@ -38,7 +38,6 @@ export default function AlarmPage() {
     let toastMessage = "Alarm set for " + `${selectedHour}:${selectedMinute}` + ".";
 
     if (alarmTimeToday < now && !(now.getHours() === hour && now.getMinutes() === minute)) {
-      // If the alarm time for today has already passed
       toastMessage = `Alarm set for ${selectedHour}:${selectedMinute}. This time has passed for today; it will ring on the next occurrence.`;
     }
     
@@ -52,20 +51,20 @@ export default function AlarmPage() {
   
   if (!isMounted) {
      return (
-      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-150px)] p-4 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-950 text-white">
-        <p className="text-2xl font-[--font-poppins]">Loading Alarm...</p>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-150px)] p-4">
+        <p className="text-2xl font-[--font-poppins] text-foreground">Loading Alarm...</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-150px)] p-4 bg-gradient-to-br from-indigo-900 via-purple-900 to-blue-950 text-white">
-      <Card className="w-full max-w-md bg-slate-800/70 backdrop-blur-sm border-slate-700 text-slate-100 shadow-2xl">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-150px)] p-4">
+      <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center">
           <CardTitle className="text-4xl font-[--font-poppins] font-bold flex items-center justify-center">
             <BellRing className="mr-3 h-10 w-10" /> FocusFlow Alarm
           </CardTitle>
-          <CardDescription className="text-slate-300 pt-2">Set your alarm to stay on track.</CardDescription>
+          <CardDescription className="text-muted-foreground pt-2">Set your alarm to stay on track.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col items-center space-y-8">
           <DigitalClock size={220} />
@@ -74,28 +73,28 @@ export default function AlarmPage() {
             <div className="w-full space-y-4">
               <div className="flex justify-around items-end space-x-3">
                 <div className="flex-1">
-                  <Label htmlFor="hour-select" className="text-sm font-medium text-slate-300">Hour</Label>
+                  <Label htmlFor="hour-select" className="text-sm font-medium text-muted-foreground">Hour</Label>
                   <Select value={selectedHour} onValueChange={setSelectedHour}>
-                    <SelectTrigger id="hour-select" className="w-full bg-slate-700 border-slate-600 text-slate-100 focus:ring-purple-500">
+                    <SelectTrigger id="hour-select" className="w-full">
                       <SelectValue placeholder="Hour" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700 text-slate-100">
+                    <SelectContent>
                       {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
-                        <SelectItem key={h} value={h} className="focus:bg-purple-700">{h}</SelectItem>
+                        <SelectItem key={h} value={h}>{h}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <span className="text-3xl font-mono pb-1">:</span>
                 <div className="flex-1">
-                  <Label htmlFor="minute-select" className="text-sm font-medium text-slate-300">Minute</Label>
+                  <Label htmlFor="minute-select" className="text-sm font-medium text-muted-foreground">Minute</Label>
                   <Select value={selectedMinute} onValueChange={setSelectedMinute}>
-                    <SelectTrigger id="minute-select" className="w-full bg-slate-700 border-slate-600 text-slate-100 focus:ring-purple-500">
+                    <SelectTrigger id="minute-select" className="w-full">
                       <SelectValue placeholder="Minute" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 border-slate-700 text-slate-100">
+                    <SelectContent>
                       {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
-                        <SelectItem key={m} value={m} className="focus:bg-purple-700">{m}</SelectItem>
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -104,8 +103,7 @@ export default function AlarmPage() {
               <Button
                 onClick={handleSetAlarm}
                 size="lg"
-                className="w-full text-lg bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-purple-500/50 transition-all duration-300 ease-in-out transform hover:scale-105"
-                style={{ boxShadow: '0 0 15px 2px hsl(var(--primary)/0.5), 0 0 25px 5px hsl(var(--primary)/0.3) inset' }}
+                className="w-full text-lg bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105"
               >
                 <BellRing className="mr-2 h-5 w-5" /> Set Alarm
               </Button>
@@ -117,8 +115,7 @@ export default function AlarmPage() {
               onClick={dismissAlarm}
               size="lg"
               variant="destructive"
-              className="w-full text-lg bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-red-500/50 transition-all duration-300 ease-in-out transform hover:scale-105 animate-pulse"
-               style={{ boxShadow: '0 0 15px 5px hsla(0,0%,100%,.3), 0 0 25px 8px hsla(0,0%,100%,.2) inset' }}
+              className="w-full text-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:scale-105 animate-pulse"
             >
               <XCircle className="mr-2 h-6 w-6" /> Dismiss Alarm
             </Button>
@@ -128,19 +125,19 @@ export default function AlarmPage() {
         <CardFooter className="flex flex-col items-center justify-center pt-6 space-y-3">
           {isAlarmSet ? (
             <div className="text-center">
-              <p className="text-lg text-green-400 font-medium">
+              <p className="text-lg text-accent-foreground font-medium" style={{color: 'hsl(var(--accent))'}}> {/* Using accent color for emphasis */}
                 Next Alarm: {formattedAlarmTime}
               </p>
-              <Button onClick={clearAlarm} variant="ghost" size="sm" className="text-amber-400 hover:text-amber-500 mt-2">
+              <Button onClick={clearAlarm} variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground/80 mt-2">
                 <BellOff className="mr-2 h-4 w-4" /> Cancel Alarm
               </Button>
             </div>
           ) : (
-            <p className="text-slate-400">No alarm set.</p>
+            <p className="text-muted-foreground">No alarm set.</p>
           )}
           {/* AdMob Placeholder */}
           {/* 
-            <div id="admob-banner-alarm" style={{ width: '100%', textAlign: 'center', padding: '10px 0', marginTop: '20px', border: '1px dashed #555' }}>
+            <div id="admob-banner-alarm" style={{ width: '100%', textAlign: 'center', padding: '10px 0', marginTop: '20px', border: '1px dashed hsl(var(--border))' }}>
               [ AdMob Banner Ad Unit for Alarm Page ]
             </div>
           */}
@@ -149,4 +146,3 @@ export default function AlarmPage() {
     </div>
   );
 }
-
