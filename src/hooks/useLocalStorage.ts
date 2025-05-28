@@ -24,21 +24,25 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, SetValue<T>] {
   }, [key]);
 
   const setValue: SetValue<T> = useCallback(
-    (value) => {
-      if (typeof window !== 'undefined' && isInitialized) {
-        try {
-          const valueToStore = value instanceof Function ? value(storedValue) : value;
-          setStoredValue(valueToStore);
-          window.localStorage.setItem(key, JSON.stringify(valueToStore));
-        } catch (error) {
-          console.error(`Error setting localStorage key "${key}":`, error);
+    (valueOrUpdater) => {
+      setStoredValue(prevState => {
+        const newValue = valueOrUpdater instanceof Function ? valueOrUpdater(prevState) : valueOrUpdater;
+        
+        // Perform side-effect (localStorage update) only on client and after initialization
+        if (typeof window !== 'undefined' && isInitialized) {
+          try {
+            window.localStorage.setItem(key, JSON.stringify(newValue));
+          } catch (error) {
+            console.error(`Error setting localStorage key "${key}":`, error);
+          }
         }
-      } else if (typeof window === 'undefined') {
-         // For SSR, just update state, don't try to use localStorage
-        setStoredValue(value instanceof Function ? value(initialValue) : value);
-      }
+        return newValue; // Return the new state for setStoredValue
+      });
     },
-    [key, storedValue, isInitialized, initialValue]
+    [key, isInitialized] // Dependencies for useCallback. 
+                         // setStoredValue from useState is stable and doesn't need to be listed.
+                         // isInitialized changes once, making setValue change identity once, which is acceptable.
+                         // key is stable.
   );
   
   // Return initialValue on server or before hydration, storedValue on client after hydration
